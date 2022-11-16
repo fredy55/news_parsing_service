@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello NewsController!{% endblock %}
+
+{% block body %}
+
+    <h1>Hello Wolrd</h1>
+
+    {% for item in news %}
+       <div>
+           <img src="{{ item.picture }}" alt="{{ item.title }}" width="20px" />
+           <strong>{{ item.title }}</strong>
+       </div>          
+    {% endfor %}
+
+{% endblock %}
