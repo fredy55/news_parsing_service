@@ -3,12 +3,13 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use App\Entity\News;
 
 class NewsController extends AbstractController
@@ -18,6 +19,7 @@ class NewsController extends AbstractController
 
     private $dbMagager;
     private $validator;
+    private $paginator;
     
     /**
      * Constructor to initialize values
@@ -25,26 +27,27 @@ class NewsController extends AbstractController
     public function __construct(
         HttpClientInterface $httpClient,
         ManagerRegistry $dbMagager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        PaginatorInterface $paginator
     ){
         $this->httpclient = $httpClient;
         $this->dbMagager = $dbMagager;
         $this->validator = $validator;
+        $this->paginator = $paginator;
     }
     
     #[Route('/', name: 'app_news', methods: "GET")]
-    public function index(): Response
+    public function index(Request $request)
     {
-        
         //$response = $this->parseNews();
-        //$this->saveNews($response); //Save news
-        //dd($response->articles);
+        //$this->saveNews($response);
 
         //Get the entity manager
         $dbmgr = $this->dbMagager->getManager();
 
         //Get the entity repository
         $newsRepo = $dbmgr->getRepository(News::class);
+
         $news = $newsRepo->createQueryBuilder('n')
                         ->orderBy('n.id', 'DESC')
                         ->getQuery();
@@ -52,20 +55,9 @@ class NewsController extends AbstractController
         //News per page
         $perpage = 10;
 
-        //News page
-        $page = 2;
-                        
-        $paginator = new Paginator($news);
-        //dd(count($paginator));
-        
-        //Total news
-        $data['ncount'] = count($paginator);
-
         //Paginated news list
-        $data['news'] = $paginator->getQuery()
-                        ->setFirstResult($perpage * ($page - 1))
-                        ->setMaxResults(10)
-                        ->getResult();
+        $data['news'] = $this->paginator->paginate($news, $request->query->getInt('page', 1), $perpage);
+
         //dd($data['news']);
         return $this->render('news/index.html.twig', $data);
     }
@@ -78,7 +70,7 @@ class NewsController extends AbstractController
         $reqData = [
             'query' => [
                 'apiKey' => $_ENV["API_KEY"],
-                'country' => 'de'
+                'country' => 'us'
             ] 
         ];
 
@@ -101,8 +93,8 @@ class NewsController extends AbstractController
         for ($i=0; $i < 20 ; $i++) { 
             $news = new News();
             $news->setTitle($ndata[$i]->title);
-            $news->setDescription($ndata[$i]->description);
-            $news->setPicture($ndata[$i]->urlToImage);
+            $news->setDescription($ndata[$i]->description == null? "" : $ndata[$i]->description);
+            $news->setPicture($ndata[$i]->urlToImage == null? "" : $ndata[$i]->urlToImage);
             $news->setCreatedAt(date("Y-m-d H:i:s", strtotime($ndata[$i]->publishedAt)));
             
             //Validate data

@@ -16,7 +16,7 @@ class News
     #[ORM\Column(name: 'title', length: 255, type: 'string', unique: true)]
     private string $title;
 
-    #[ORM\Column(name: 'description', type: 'text')]
+    #[ORM\Column(name: 'description', type: 'text', nullable: 'true')]
     private string $description;
 
     #[ORM\Column(name: 'picture', length: 1200, type: 'string')]

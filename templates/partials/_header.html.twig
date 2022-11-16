@@ -1,0 +1,24 @@
+<div class="container head">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ path('app_news') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_news') }}">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_news') }}">
+                        <button type="button" class="btn btn-primary">
+                            News Count 
+                            <span class="badge bg-secondary">
+                               {{ news.getTotalItemCount() }}
+                            </span>
+                        </button>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
